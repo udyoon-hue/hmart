@@ -1,16 +1,22 @@
+import SideMenu from "@/components/SideMenu";
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { usePathname, useRouter } from "expo-router";
-import { Dimensions, Image, PixelRatio, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useContext, useState } from "react";
+import { Dimensions, Image, PixelRatio, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context"; //노치, 홈 버튼, 상태바 등에 콘텐츠가 가려지지 않도록 여백을 알려줍니다.
+import { AuthContext } from "../../_layout";
 
 export default function Index() {
   const router = useRouter();
   const Pathname = usePathname();
   const insets = useSafeAreaInsets();
-  const isLoggedIn = false;
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const {user} = useContext(AuthContext);
+  const isLoggedIn = !!user;  
 
-  console.log("Pathname",usePathname)
-  console.log("insets",insets);
+  //console.log("Pathname",usePathname)
+  //console.log("insets",insets);
 
   const {width,height} = Dimensions.get("window") //화
   console.log(`화면 너비: ${width}dp , ${height}dp` );
@@ -25,19 +31,28 @@ export default function Index() {
       {/*width랑 height 없으면 이미지가 안 보여 */}
       {/*Blur View install 해야함 나중에 다시 해봐*/}
       {/* push는 히스토리에 싸이는것 replace 히스토리에 안 싸이는것(마지막것 빼고), navigate 중복을 제거하고 저장합니다 */}
-      <BlurView style={styles.header} intensity={80} >
+      <BlurView style={styles.header} intensity={70} >
+        
+        {isLoggedIn && (
+          <Pressable
+            style={styles.menuButton}
+            onPress={() => {
+              setIsSideMenuOpen(true)
+            }}
+          >
+            <Ionicons name="menu" size={24} color="black" />            
+          </Pressable>
+        )}        
+
+        <SideMenu
+          isVisible={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+        />
+
         <Image source={require ( "../../../assets/images/react-logo.png")}  
           style={styles.headerLogo}  
-        />
-      
-        {!isLoggedIn && (
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.navigate(`/login`)}
-          >
-            <Text style={styles.loginButtonText}>로그인</Text>
-          </TouchableOpacity>
-        )}        
+        />      
+        
       </BlurView>  
       
       {isLoggedIn && (
@@ -106,5 +121,10 @@ const styles = StyleSheet.create({
   },
   loginButtonText:{
     color:"white",
+  },
+  menuButton:{
+    position:"absolute",
+    left: 20,
+    top: 10,
   },
 });

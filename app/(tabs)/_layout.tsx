@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { type BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Animated, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { AuthContext } from "../_layout";
 //rest문법
 
 const AnimatedTabBarButton= ({children,onPress,style,...restProps}: BottomTabBarButtonProps) =>{
@@ -49,19 +50,25 @@ const AnimatedTabBarButton= ({children,onPress,style,...restProps}: BottomTabBar
 export default function TabLayout(){
 
     const router = useRouter();
-    const isLoggedIn = true;
-    const [isLoginModalOpen,SetIsLoginModalOpen] = useState(false);
+    const {user} = useContext(AuthContext);
+    const isLoggedIn = !!user;
+    console.log("user",user,"isLoggedIn",isLoggedIn);
+    const [isLoginModalOpen,setIsLoginModalOpen] = useState(false);
 
     const openLoginModal = ()=>{
       console.log("Modal open!"); // 터미널에서 확인
-      SetIsLoginModalOpen(true);
+      setIsLoginModalOpen(true);
     }
 
     const closeLoginModal = ()=>{
       console.log("닫기 버튼 눌림!"); // 터미널에서 확인
-      SetIsLoginModalOpen(false);
+      setIsLoginModalOpen(false);
     }
 
+    const toLoginPage =() =>{
+      setIsLoginModalOpen(false);
+      router.push("/login");
+    }
 
     //backBehavior="history"  뒤로가기 버튼을 누르면 아래바에서 차례차례로 뒤로간다
     //tabBarButton: (props) => <AnimatedTabBarButton{...props} />  아래버튼을 커져다 작아져다하는 기능
@@ -137,16 +144,17 @@ export default function TabLayout(){
           }}
         />
         </Tabs>
-        
-        <Modal visible ={isLoginModalOpen} >  {/* 로그인 모달의 표시 여부 제어 (true면 보임) */}
+                
+        <Modal visible = {isLoginModalOpen} >  
           <View
             style={{flex: 1,justifyContent: "flex-end",backgroundColor: "rgba(0,0,0,0.5)", }}
           >
           
-            <View 
-              style={{backgroundColor: "white", padding: 20 }}
-            >
-              <Text>Login Modal</Text>          
+            <View style={{backgroundColor: "white", padding: 20 }}>              
+              <Pressable  onPress={toLoginPage}>
+                <Text>Login Modal</Text>          
+              </Pressable>  
+              
               <TouchableOpacity onPress={closeLoginModal}>
                   <Ionicons name="close" size={24} color="#555" />
               </TouchableOpacity>
